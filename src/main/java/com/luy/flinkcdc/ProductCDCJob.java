@@ -1,11 +1,13 @@
 package com.luy.flinkcdc;
 
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
+// 程序连接不上
 public class ProductCDCJob {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         // 创建执行环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -54,6 +56,9 @@ public class ProductCDCJob {
         // 从源表选择所有数据，准备插入到Sink表
         Table productTable = tableEnv.sqlQuery("select * from products");
 
+//        tableEnv.executeSql("select count(1) from products").print();
+//        tableEnv.executeSql("select * from products").print();
+//
         // 插入数据到Kafka Sink表
         productTable.executeInsert("kafkaSink");
 

@@ -86,11 +86,17 @@
             <artifactId>flink-connector-datagen</artifactId>
             <version>${flink.version}</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>mysql</groupId>-->
+<!--            <artifactId>mysql-connector-java</artifactId>-->
+<!--            <version>5.1.27</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.27</version>
+            <version>8.0.33</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-jdbc</artifactId>
@@ -110,11 +116,11 @@
             <version>3.1.3</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-planner-loader</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.flink</groupId>-->
+<!--            <artifactId>flink-table-planner-loader</artifactId>-->
+<!--            <version>${flink.version}</version>-->
+<!--        </dependency>-->
         <!-- Flink Table Api和SQL的执行计划生成-->
         <dependency>
             <groupId>org.apache.flink</groupId>
