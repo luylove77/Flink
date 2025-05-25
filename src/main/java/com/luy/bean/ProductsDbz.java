@@ -20,6 +20,18 @@ public class ProductsDbz {
     // 操作类型
     String op;
 
+//    // 逻辑删除
+//    Boolean isDeleted;
+
+//    public Boolean getIsDeleted() {
+//        return isDeleted;
+//    }
+//
+//    public void setIsDeleted(Boolean deleted) {
+//        isDeleted = deleted;
+//    }
+
+
     public String getTable() {
         return table;
     }
@@ -86,6 +98,7 @@ public class ProductsDbz {
                 ", description='" + description + '\'' +
                 ", age=" + age +
                 ", op='" + op + '\'' +
+//                ", isDeleted=" + isDeleted +
                 '}';
     }
 

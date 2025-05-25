@@ -3,6 +3,7 @@ package com.luy.flinkkafkaapi;
 import com.alibaba.fastjson.JSON;
 import com.luy.bean.ProductsDbz;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.base.DeliveryGuarantee;
@@ -56,9 +57,24 @@ public class DebeziumToJson {
         DataStreamSource<String> kfDbzDS = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "products_dbzium");
 
 //        kfDbzDS.print();
+        // 过滤kafka中的null消息
+        // 加了value == "null"，debezium监控mysql delete null的消息过滤了, 下游ods也不会重复消费
+        SingleOutputStreamOperator<String> filteredDS = kfDbzDS.filter(
+                new FilterFunction<String>() {
+
+                    @Override
+                    public boolean filter(String value) throws Exception {
+                        if (value == null || value.trim().isEmpty() || value == "null") {
+                            return false;
+                        }
+                        return true;
+                    }
+                }
+        );
+
 
         SingleOutputStreamOperator<ProductsDbz> mapDbz
-                = kfDbzDS.map(new MapFunction<String, ProductsDbz>() {
+                = filteredDS.map(new MapFunction<String, ProductsDbz>() {
                     @Override
                     public ProductsDbz map(String value) throws Exception {
                         // 将jsonstr->jsonobj , 为了操作方便
@@ -72,7 +88,10 @@ public class DebeziumToJson {
                         } else {
                             productsDbz = jsonObj.getObject("after", ProductsDbz.class);
                         }
-                        productsDbz.setOp(op);
+
+                        if (productsDbz != null) {
+                            productsDbz.setOp(op);
+                        }
 
                         return productsDbz;
                     }
@@ -82,9 +101,11 @@ public class DebeziumToJson {
         SingleOutputStreamOperator<String> process = mapDbz.process(new ProcessFunction<ProductsDbz, String>() {
             @Override
             public void processElement(ProductsDbz value, ProcessFunction<ProductsDbz, String>.Context ctx, Collector<String> out) throws Exception {
+                if (value != null) {
                 // 将对象转换为jsonstr
                 String jsonStr = JSON.toJSONString(value);
                 out.collect(jsonStr);
+                }
             }
         });
 
@@ -115,7 +136,7 @@ public class DebeziumToJson {
                 .setBootstrapServers("hadoop100:9092,hadoop101:9092,hadoop102:9092")
                 .setRecordSerializer( // 序列化器
                         KafkaRecordSerializationSchema.<String>builder()
-                                .setTopic("products-res")
+                                .setTopic("products-res4")
                                 .setValueSerializationSchema(new SimpleStringSchema())
                                 .build()
                 )
